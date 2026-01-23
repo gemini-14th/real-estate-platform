@@ -1,0 +1,28 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Property {
+  id           String   @id @default(cuid())
+  title        String
+  price        Float
+  location     String
+  videoUrl     String
+  thumbnailUrl String
+  description  String
+  beds         Int
+  baths        Int
+  sqft         Int
+  type         String
+  tags         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  agentName    String?
+  agentAvatar  String?  
+}

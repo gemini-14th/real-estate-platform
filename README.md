@@ -1,36 +1,120 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏙️ ChrisUrbanrealty - Immersive Real Estate Platform
 
-## Getting Started
+Welcome to **ChrisUrbanrealty**, a high-end, immersive real estate platform designed for the modern era. Inspired by the dynamic engagement of short-form video content, this platform transforms the traditional property search into a visually stunning, "TikTok-style" experience.
 
-First, run the development server:
+---
 
+## ✨ Project Highlights
+
+- **Immersive Video Feed**: A full-screen, scrollable video feed that allows users to experience properties as if they were there.
+- **Premium Aesthetics**: A dark-mode, glassmorphic design system using deep blacks, vibrant primaries, and smooth animations.
+- **Persistent Collections**: A cloud-synced saving system where clients can "Heart" properties and view them later in their personal collection.
+- **Admin Control Center**: A secure, hidden management dashboard for property listings and media handling.
+- **Cloud-Powered Media**: Direct integration with Cloudinary for fast, optimized property videos and images.
+- **Smart Search**: Filter by location, price, and property type (Sale/Rent) with real-time results.
+
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Technology |
+| :--- | :--- |
+| **Framework** | [Next.js 15 (App Router)](https://nextjs.org/) |
+| **Styling** | [Tailwind CSS](https://tailwindcss.com/) |
+| **Animations** | [Framer Motion](https://www.framer.com/motion/) |
+| **Icons** | [Lucide React](https://lucide.dev/) |
+| **Media Hosting** | [Cloudinary](https://cloudinary.com/) |
+| **Database** | Lightweight JSON File Database (Scalable to PostgreSQL/Prisma) |
+| **Auth** | Custom JWT-style session management with Mock Google integration |
+
+---
+
+## 🚀 Getting Started
+
+### 1. Prerequisites
+Ensure you have **Node.js 18+** installed on your system.
+
+### 2. Installation
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Clone the repository
+git clone <repository-url>
+
+# Install dependencies
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Environment Configuration
+Create a `.env` file in the root directory and add your credentials:
+```env
+# Cloudinary Keys (For Media Uploads)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Security
+ADMIN_SECRET=admin123
+NEXT_PUBLIC_ADMIN_SECRET=admin123
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Direct Entry
+Run the development server:
+```bash
+npm run dev
+```
+Access the site at `http://localhost:3000`.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🔐 Security & Access Control
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Admin Access (The "Ritual")
+The Admin portal is hidden for maximum security. To access it:
+1.  Navigate to any page on the website.
+2.  Find the **"ChrisUrbanrealty" logo** in the top navbar.
+3.  **Click the logo 5 times** rapidly.
+4.  You will be redirected to the **Admin Authentication** page.
+5.  Enter your `ADMIN_SECRET` to unlock the dashboard.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### User Authentication
+Clients can sign up or log in using:
+- **Email/Password**: Persistent accounts stored in the local JSON database.
+- **Google Auth (Mock)**: A seamless demo of third-party authentication.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📁 File Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```text
+src/
+├── app/                  # Next.js App Router (Pages & API Routes)
+│   ├── admin/            # Protected Dashboard
+│   ├── auth/             # Login/Register Pages
+│   ├── properties/       # Property Detail Pages
+│   └── api/              # Backend Endpoints (Auth, Properties, Saved)
+├── components/           # Reusable UI Architecture
+│   ├── video-feed.tsx    # Core Reel Engine
+│   ├── navbar.tsx        # Dynamic Global Navigation
+│   └── contact-modal.tsx # Inquiry Handling
+├── lib/                  # Utilities & Database Models
+│   ├── json-db.ts        # File-based DB Logic
+│   └── cloudinary.ts     # Media Service Config
+└── types/                # TypeScript Definitions
+```
+
+---
+
+## 📈 Roadmap & Future Scope
+- **Interactive Maps**: Full MapBox integration for location exploring.
+- **AI Chatbot**: Intelligent virtual assistant for instant property inquiries.
+- **360° Tours**: Native support for VR/360 panoramic views within the feed.
+- **Real-time Notifications**: Webhooks for new listing alerts and agent messages.
+
+---
+
+## 👨‍💼 Representative
+All properties are managed exclusively by our lead agent: **Alain Christian**.
+
+---
+
+© 2026 ChrisUrbanrealty. Built for the future of Real Estate.
