@@ -78,11 +78,14 @@ export function saveSavedItems(items: any[]) {
 // --- User Operations ---
 export function registerUser(user: any) {
     const users = getUsers();
-    if (users.find((u: any) => u.email === user.email)) {
+    const normalizedEmail = user.email.trim().toLowerCase();
+    if (users.find((u: any) => u.email === normalizedEmail)) {
         throw new Error("User already exists");
     }
     const newUser = {
         ...user,
+        email: normalizedEmail,
+        password: user.password.trim(),
         id: Math.random().toString(36).substr(2, 9),
         createdAt: new Date().toISOString()
     };
@@ -95,7 +98,9 @@ export function registerUser(user: any) {
 
 export function authenticateUser(email: string, pass: string) {
     const users = getUsers();
-    const user = users.find((u: any) => u.email === email && u.password === pass);
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPass = pass.trim();
+    const user = users.find((u: any) => u.email === normalizedEmail && u.password === normalizedPass);
     if (user) {
         const { password, ...safeUser } = user;
         return safeUser;

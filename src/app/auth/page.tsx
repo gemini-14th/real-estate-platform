@@ -10,6 +10,7 @@ export default function AuthPage() {
     const [isLogin, setIsLogin] = useState(true);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
 
     const [formData, setFormData] = useState({
         email: "",
@@ -24,11 +25,18 @@ export default function AuthPage() {
 
         const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
 
+        // Normalize email and password for consistency
+        const payload = {
+            ...formData,
+            email: formData.email.trim().toLowerCase(),
+            password: formData.password.trim()
+        };
+
         try {
             const res = await fetch(endpoint, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(payload)
             });
 
             const data = await res.json();
@@ -125,17 +133,35 @@ export default function AuthPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Password</label>
+                                <div className="flex justify-between items-center px-1">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Password</label>
+                                    {isLogin && (
+                                        <button
+                                            type="button"
+                                            onClick={() => alert("Password reset link sent to: " + formData.email)}
+                                            className="text-[10px] font-bold text-primary hover:underline uppercase tracking-tighter"
+                                        >
+                                            Forgot?
+                                        </button>
+                                    )}
+                                </div>
                                 <div className="relative group/input">
                                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within/input:text-primary transition-colors" size={20} />
                                     <input
                                         required
-                                        type="password"
-                                        className="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-4 py-4 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-gray-700"
+                                        type={showPassword ? "text" : "password"}
+                                        className="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-12 py-4 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-gray-700"
                                         placeholder="••••••••"
                                         value={formData.password}
                                         onChange={e => setFormData({ ...formData, password: e.target.value })}
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                                    >
+                                        <span className="text-[10px] font-black">{showPassword ? "HIDE" : "SHOW"}</span>
+                                    </button>
                                 </div>
                             </div>
 
