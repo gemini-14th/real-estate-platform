@@ -25,7 +25,7 @@ Welcome to **ChrisUrbanrealty**, a high-end, immersive real estate platform desi
 | **Icons** | [Lucide React](https://lucide.dev/) |
 | **Media Hosting** | [Cloudinary](https://cloudinary.com/) |
 | **Database** | Lightweight JSON File Database (Scalable to PostgreSQL/Prisma) |
-| **Auth** | Custom JWT-style session management with Mock Google integration |
+| **Auth** | Custom JWT-style session management |
 
 ---
 
@@ -79,7 +79,6 @@ The Admin portal is hidden for maximum security. To access it:
 ### User Authentication
 Clients can sign up or log in using:
 - **Email/Password**: Persistent accounts stored in the local JSON database.
-- **Google Auth (Mock)**: A seamless demo of third-party authentication.
 
 ---
 
