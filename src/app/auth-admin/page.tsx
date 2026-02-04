@@ -12,8 +12,16 @@ export default function AdminAuthPage() {
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
-        if (password === process.env.NEXT_PUBLIC_ADMIN_SECRET) {
-            localStorage.setItem("admin_secret", password);
+
+        // Robust comparison with trimming
+        const cleanPassword = password?.trim();
+        const cleanSecret = process.env.NEXT_PUBLIC_ADMIN_SECRET?.trim();
+
+        console.log("Input length:", cleanPassword?.length);
+        console.log("Secret loaded:", !!cleanSecret);
+
+        if (cleanPassword && cleanSecret && cleanPassword === cleanSecret) {
+            localStorage.setItem("admin_secret", cleanPassword);
             setSuccess(true);
             setError(false);
             // Reload to update navbar
@@ -21,6 +29,7 @@ export default function AdminAuthPage() {
                 window.location.href = "/admin";
             }, 1000);
         } else {
+            console.log("Login failed");
             setError(true);
             setSuccess(false);
         }

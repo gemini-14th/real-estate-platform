@@ -16,7 +16,9 @@ export default function Navbar() {
     useEffect(() => {
         const checkAuth = () => {
             const adminSecret = localStorage.getItem("admin_secret");
-            setIsAdmin(adminSecret === process.env.NEXT_PUBLIC_ADMIN_SECRET);
+            const cleanSecret = adminSecret?.trim();
+            const envSecret = process.env.NEXT_PUBLIC_ADMIN_SECRET?.trim();
+            setIsAdmin(!!cleanSecret && !!envSecret && cleanSecret === envSecret);
 
             const savedUser = localStorage.getItem("user");
             if (savedUser) setUser(JSON.parse(savedUser));

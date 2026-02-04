@@ -28,7 +28,10 @@ export default function AdminPage() {
 
     useEffect(() => {
         const secret = localStorage.getItem("admin_secret");
-        if (secret !== process.env.NEXT_PUBLIC_ADMIN_SECRET) {
+        const cleanSecret = secret?.trim();
+        const envSecret = process.env.NEXT_PUBLIC_ADMIN_SECRET?.trim();
+
+        if (!cleanSecret || !envSecret || cleanSecret !== envSecret) {
             window.location.href = "/";
             return;
         }
