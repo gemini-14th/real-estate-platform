@@ -4,12 +4,12 @@ import prisma from '@/lib/prisma';
 
 export async function GET() {
     try {
-        const properties = await prisma.property.findMany({
+        const properties = await (prisma.property as any).findMany({
             orderBy: { createdAt: 'desc' }
         });
 
         // Convert back string tags to array for frontend
-        const parsedProperties = properties.map(p => ({
+        const parsedProperties = properties.map((p: any) => ({
             ...p,
             tags: typeof p.tags === 'string' ? JSON.parse(p.tags) : []
         }));
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
         const finalVideoUrl = body.videoUrl || "https://coverr.co/files/coverr-interior-design-of-a-living-room-with-a-yellow-sofa-2594/1080p.mp4";
 
-        const newProperty = await prisma.property.create({
+        const newProperty = await (prisma.property as any).create({
             data: {
                 title: body.title,
                 price: Number(body.price),
