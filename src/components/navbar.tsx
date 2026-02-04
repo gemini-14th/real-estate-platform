@@ -67,9 +67,9 @@ export default function Navbar() {
 
                     {/* Desktop Navigation */}
                     <nav className="hidden md:flex items-center gap-8 text-white/90 font-medium z-50 text-sm">
-                        <Link href="/search?type=Sale" className="hover:text-white transition-colors">Buy</Link>
+                        <Link href="/search?type=Buy" className="hover:text-white transition-colors">Buy</Link>
                         <Link href="/search?type=Rent" className="hover:text-white transition-colors">Rent</Link>
-                        <Link href="/sell" className="hover:text-white transition-colors text-primary font-bold">Sell</Link>
+
                         {user && (
                             <Link href="/saved" className="hover:text-white transition-colors flex items-center gap-1">
                                 <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
@@ -132,9 +132,9 @@ export default function Navbar() {
                         className="fixed inset-0 z-40 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center space-y-8 md:hidden"
                     >
                         <nav className="flex flex-col items-center gap-6 text-2xl font-light text-white">
-                            <Link href="/search?type=Sale" onClick={() => setIsMobileMenuOpen(false)}>Buy</Link>
+                            <Link href="/search?type=Buy" onClick={() => setIsMobileMenuOpen(false)}>Buy</Link>
                             <Link href="/search?type=Rent" onClick={() => setIsMobileMenuOpen(false)}>Rent</Link>
-                            <Link href="/sell" onClick={() => setIsMobileMenuOpen(false)} className="text-primary font-bold">Sell</Link>
+
                             {user && (
                                 <Link href="/saved" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2">
                                     Collection
@@ -152,11 +152,7 @@ export default function Navbar() {
                             >
                                 {isAdmin ? "Logout" : "Log In"}
                             </button>
-                            <Link href="/sell" className="w-full max-w-xs" onClick={() => setIsMobileMenuOpen(false)}>
-                                <button className="px-8 py-3 bg-primary text-black font-bold rounded-full w-full">
-                                    List Property
-                                </button>
-                            </Link>
+
                         </div>
                     </motion.div>
                 )}

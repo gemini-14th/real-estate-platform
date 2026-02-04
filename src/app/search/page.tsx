@@ -73,7 +73,7 @@ function SearchContent() {
                     </div>
 
                     <div className="flex justify-center gap-4 mt-6">
-                        {["All", "Sale", "Rent"].map((t) => (
+                        {["All", "Buy", "Rent"].map((t) => (
                             <button
                                 key={t}
                                 onClick={() => setType(t)}

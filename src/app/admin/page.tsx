@@ -10,6 +10,7 @@ export default function AdminPage() {
     const [properties, setProperties] = useState<Property[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingProperty, setEditingProperty] = useState<Property | null>(null);
 
     const fetchProperties = async () => {
         setIsLoading(true);
@@ -43,16 +44,31 @@ export default function AdminPage() {
         window.location.href = "/";
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this listing?")) return;
+    const handleEdit = (property: Property) => {
+        setEditingProperty(property);
+        setIsModalOpen(true);
+    };
 
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setEditingProperty(null);
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm("Are you sure you want to delete this listing? Created listings cannot be recovered.")) return;
+
+        // Optimistic UI update could go here, but for simplicity we wait
         try {
             const res = await fetch(`/api/properties/${id}`, { method: "DELETE" });
             if (res.ok) {
                 fetchProperties();
+            } else {
+                const errorData = await res.json();
+                alert(`Failed to delete: ${errorData.error || "Unknown error"}`);
             }
         } catch (error) {
             console.error("Failed to delete", error);
+            alert("Network error while deleting");
         }
     };
 
@@ -82,7 +98,10 @@ export default function AdminPage() {
                             <RefreshCcw size={20} className={isLoading ? "animate-spin" : ""} />
                         </button>
                         <button
-                            onClick={() => setIsModalOpen(true)}
+                            onClick={() => {
+                                setEditingProperty(null);
+                                setIsModalOpen(true);
+                            }}
                             className="flex items-center gap-2 px-6 py-3 bg-primary text-black font-bold rounded-xl hover:bg-primary/90 transition-colors"
                         >
                             <Plus size={20} />
@@ -123,16 +142,19 @@ export default function AdminPage() {
                                         </div>
 
                                         <div className="col-span-2 hidden md:block">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${property.type === 'Sale'
+                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${property.type === 'Sale' || property.type === 'Buy'
                                                 ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
                                                 : 'bg-green-500/10 text-green-500 border border-green-500/20'
                                                 }`}>
-                                                For {property.type}
+                                                For {property.type === 'Buy' ? 'Sale' : property.type}
                                             </span>
                                         </div>
 
                                         <div className="col-span-12 md:col-span-3 flex justify-end gap-2 border-t md:border-t-0 border-white/5 pt-4 md:pt-0">
-                                            <button className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                                            <button
+                                                onClick={() => handleEdit(property)}
+                                                className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                            >
                                                 <Edit2 size={18} />
                                             </button>
                                             <button
@@ -151,8 +173,9 @@ export default function AdminPage() {
 
                 <AddListingModal
                     isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
+                    onClose={handleCloseModal}
                     onSuccess={fetchProperties}
+                    initialData={editingProperty}
                 />
             </div>
         </div>

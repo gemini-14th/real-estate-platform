@@ -5,5 +5,19 @@
     "name": "Samuel Anindo",
     "id": "avqp9j3y8",
     "createdAt": "2026-01-23T13:15:32.311Z"
+  },
+  {
+    "email": "jamesanindo14@gmail.com",
+    "password": "james",
+    "name": "james",
+    "id": "j9xvgimeh",
+    "createdAt": "2026-02-04T20:27:22.978Z"
+  },
+  {
+    "email": "jamesanindo@gmail.com",
+    "password": "james",
+    "name": "james",
+    "id": "n3nw6qwqp",
+    "createdAt": "2026-02-04T20:28:29.987Z"
   }
 ]

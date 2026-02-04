@@ -1,22 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Upload, Loader2, Check } from "lucide-react";
 import CloudinaryUpload from "./cloudinary-upload";
 
-interface AddListingModalProps {
+interface ListingModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    initialData?: any;
 }
 
-export default function AddListingModal({ isOpen, onClose, onSuccess }: AddListingModalProps) {
+export default function ListingModal({ isOpen, onClose, onSuccess, initialData }: ListingModalProps) {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         title: "",
         price: "",
         location: "",
-        type: "Sale",
+        type: "Buy",
         beds: "",
         baths: "",
         sqft: "",
@@ -25,6 +26,43 @@ export default function AddListingModal({ isOpen, onClose, onSuccess }: AddListi
         thumbnailUrl: "",
     });
 
+    useEffect(() => {
+        if (isOpen) {
+            setFormData({
+                title: initialData?.title || "",
+                price: initialData?.price || "",
+                location: initialData?.location || "",
+                type: initialData?.type || "Buy",
+                beds: initialData?.beds || "",
+                baths: initialData?.baths || "",
+                sqft: initialData?.sqft || "",
+                description: initialData?.description || "",
+                videoUrl: initialData?.videoUrl || "",
+                thumbnailUrl: initialData?.thumbnailUrl || "",
+            });
+        }
+    }, [isOpen, initialData]);
+
+    // Reset form when initialData changes or modal opens
+    // (In a real app, useEffect might be needed, but since we remount/control visibility, initial state might is tricky.
+    // However, since we are doing a simple modal, we can initialize state directly if the component is conditionally rendered or we can use useEffect)
+
+    // Better approach for modal reuse:
+    // When `initialData` changes (i.e. we click edit on a different item), we need to update state.
+    // However, hooks cannot be inside loops or conditionals.
+    // The simplest way without complex useEffects is to key the modal on the parent, 
+    // OR we just use a useEffect here to sync.
+
+    // Let's use a key in the parent to force remount, 
+    // OR just use useEffect here. useEffect is safer.
+
+    // Actually, I'll just stick to standard functional component patterns.
+    // Since I'm editing the file in place, let's add a useEffect to sync if isOpen changes or initialData changes.
+    // But wait, React state initialized in `useState` only runs once. 
+    // I will add a useEffect to reset the form data when `initialData` changes.
+
+    const isEditing = !!initialData;
+
     if (!isOpen) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -32,8 +70,11 @@ export default function AddListingModal({ isOpen, onClose, onSuccess }: AddListi
         setLoading(true);
 
         try {
-            const res = await fetch("/api/properties", {
-                method: "POST",
+            const url = isEditing ? `/api/properties/${initialData.id}` : "/api/properties";
+            const method = isEditing ? "PUT" : "POST";
+
+            const res = await fetch(url, {
+                method: method,
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     ...formData,
@@ -41,8 +82,8 @@ export default function AddListingModal({ isOpen, onClose, onSuccess }: AddListi
                     beds: Number(formData.beds),
                     baths: Number(formData.baths),
                     sqft: Number(formData.sqft),
-                    tags: ["New Listing"], // Default tag
-                    agent: {
+                    tags: initialData?.tags || ["New Listing"],
+                    agent: initialData?.agent || {
                         name: "Admin User",
                         avatar: "https://i.pravatar.cc/150?u=admin"
                     }
@@ -53,11 +94,12 @@ export default function AddListingModal({ isOpen, onClose, onSuccess }: AddListi
                 onSuccess();
                 onClose();
             } else {
-                alert("Failed to create listing");
+                const errorData = await res.json();
+                alert(`Failed to ${isEditing ? 'update' : 'create'} listing: ${errorData.error || "Unknown error"}`);
             }
         } catch (error) {
             console.error(error);
-            alert("Error creating listing");
+            alert(`Network error while ${isEditing ? 'updating' : 'creating'} listing`);
         } finally {
             setLoading(false);
         }
@@ -73,7 +115,7 @@ export default function AddListingModal({ isOpen, onClose, onSuccess }: AddListi
                     <X size={20} />
                 </button>
 
-                <h2 className="text-2xl font-bold mb-6">Add New Listing</h2>
+                <h2 className="text-2xl font-bold mb-6">{isEditing ? "Edit Listing" : "Add New Listing"}</h2>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -118,7 +160,7 @@ export default function AddListingModal({ isOpen, onClose, onSuccess }: AddListi
                                 value={formData.type}
                                 onChange={e => setFormData({ ...formData, type: e.target.value })}
                             >
-                                <option value="Sale">For Sale</option>
+                                <option value="Buy">For Sale</option>
                                 <option value="Rent">For Rent</option>
                             </select>
                         </div>
@@ -175,18 +217,19 @@ export default function AddListingModal({ isOpen, onClose, onSuccess }: AddListi
                                 resourceType="video"
                                 onUpload={(url: string) => setFormData({ ...formData, videoUrl: url })}
                             />
+                            {formData.videoUrl && (
+                                <p className="text-xs text-gray-500 break-all">{formData.videoUrl}</p>
+                            )}
+
                             <CloudinaryUpload
                                 label="Upload Property Thumbnail"
                                 resourceType="image"
                                 onUpload={(url: string) => setFormData({ ...formData, thumbnailUrl: url })}
                             />
+                            {formData.thumbnailUrl && (
+                                <p className="text-xs text-gray-500 break-all">{formData.thumbnailUrl}</p>
+                            )}
                         </div>
-
-                        {formData.videoUrl && (
-                            <p className="text-xs text-green-500 flex items-center gap-1">
-                                <Check size={12} /> Video is ready
-                            </p>
-                        )}
                     </div>
 
                     <div className="pt-6">
@@ -196,7 +239,7 @@ export default function AddListingModal({ isOpen, onClose, onSuccess }: AddListi
                             className="w-full py-4 bg-primary text-black font-bold rounded-xl hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
                         >
                             {loading && <Loader2 className="animate-spin" size={20} />}
-                            {loading ? "Creating..." : "Create Listing"}
+                            {loading ? (isEditing ? "Updating..." : "Creating...") : (isEditing ? "Update Listing" : "Create Listing")}
                         </button>
                     </div>
                 </form>

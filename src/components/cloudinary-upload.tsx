@@ -16,12 +16,14 @@ export default function CloudinaryUpload({ onUpload, resourceType, label }: Clou
 
     return (
         <CldUploadWidget
-            uploadPreset="ml_default" // The user will need to create this in Cloudinary
-            onUpload={(result: any) => {
-                if (result.event === 'success') {
-                    setStatus('success');
-                    onUpload(result.info.secure_url, resourceType);
-                }
+            uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_PRESET || "real_estate_preset"}
+            onSuccess={(result: any) => {
+                setStatus('success');
+                setFileName(result?.info?.original_filename || "File");
+                onUpload(result?.info?.secure_url, resourceType);
+            }}
+            onQueuesStart={() => {
+                setStatus('uploading');
             }}
             options={{
                 maxFiles: 1,
@@ -41,12 +43,19 @@ export default function CloudinaryUpload({ onUpload, resourceType, label }: Clou
                         : 'border-white/10 bg-black/40 text-gray-400 hover:border-primary/50 hover:text-white'
                         }`}
                 >
-                    {status === 'success' ? (
+                    {status === 'uploading' && (
+                        <>
+                            <Loader2 size={20} className="animate-spin" />
+                            <span>Uploading...</span>
+                        </>
+                    )}
+                    {status === 'success' && (
                         <>
                             <Check size={20} />
-                            <span>{label} Uploaded!</span>
+                            <span>{fileName || label} Uploaded!</span>
                         </>
-                    ) : (
+                    )}
+                    {status === 'idle' && (
                         <>
                             <Upload size={20} />
                             <span>{label}</span>

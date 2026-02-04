@@ -19,6 +19,7 @@ export default function VideoCard({ property, isActive }: VideoCardProps) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
+    const [hasError, setHasError] = useState(false);
 
     useEffect(() => {
         const checkSaved = async () => {
@@ -67,23 +68,37 @@ export default function VideoCard({ property, isActive }: VideoCardProps) {
     };
 
     useEffect(() => {
-        if (isActive) {
-            const playPromise = videoRef.current?.play();
+        if (isActive && videoRef.current && !hasError) {
+            // Reset error if switching active state
+
+            const playPromise = videoRef.current.play();
             if (playPromise !== undefined) {
                 playPromise
                     .then(() => {
                         setIsPlaying(true);
                     })
                     .catch((error: any) => {
-                        console.log("Autoplay prevented:", error);
+                        // Suppress AbortError (common when scrolling fast)
+                        if (error.name === 'AbortError') return;
+
+                        // Auto-play was prevented
+                        // This usually happens if the user hasn't interacted with the document yet
+                        // or if the video source is invalid.
+                        console.warn("Autoplay prevented for video:", property.title, error);
                         setIsPlaying(false);
                     });
             }
-        } else {
-            videoRef.current?.pause();
+        } else if (videoRef.current) {
+            videoRef.current.pause();
             setIsPlaying(false);
         }
-    }, [isActive]);
+    }, [isActive, property.title, hasError]);
+
+    // Handle video error specifically
+    const handleVideoError = (e: any) => {
+        // console.error("Video error for property:", property.title, e.currentTarget.error);
+        setHasError(true);
+    };
 
     const toggleMute = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -106,17 +121,26 @@ export default function VideoCard({ property, isActive }: VideoCardProps) {
 
     return (
         <div className="relative h-screen w-full snap-start overflow-hidden bg-black">
-            {/* Video Player */}
-            <video
-                ref={videoRef}
-                src={property.videoUrl}
-                className="h-full w-full object-cover"
-                loop
-                muted={isMuted}
-                playsInline
-                onClick={togglePlay}
-                poster={property.thumbnailUrl}
-            />
+            {/* Media Player: Video or Fallback Image */}
+            {hasError || !property.videoUrl ? (
+                <img
+                    src={property.thumbnailUrl || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1080"}
+                    alt={property.title}
+                    className="h-full w-full object-cover"
+                />
+            ) : (
+                <video
+                    ref={videoRef}
+                    src={property.videoUrl}
+                    className="h-full w-full object-cover"
+                    loop
+                    muted={isMuted}
+                    playsInline
+                    onClick={togglePlay}
+                    poster={property.thumbnailUrl}
+                    onError={handleVideoError}
+                />
+            )}
 
             {/* Overlay Gradient */}
             <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80 pointer-events-none" />

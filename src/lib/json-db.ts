@@ -42,8 +42,15 @@ export function addProperty(property: any) {
 
 export function deleteProperty(id: string) {
     const current = getProperties();
+    const initialLength = current.length;
     const filtered = current.filter((p: any) => p.id !== id);
+
+    if (filtered.length === initialLength) {
+        return false;
+    }
+
     saveProperties(filtered);
+    return true;
 }
 
 export function updateProperty(id: string, updates: any) {

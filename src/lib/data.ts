@@ -9,7 +9,7 @@ export interface Property {
     beds: number;
     baths: number;
     sqft: number;
-    type: "Sale" | "Rent";
+    type: "Buy" | "Rent" | "Sale";
     tags: string[];
     agent: {
         name: string;
