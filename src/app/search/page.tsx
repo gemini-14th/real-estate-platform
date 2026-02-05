@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 // import { PROPERTIES } from "@/lib/data"; // Use API
 import Navbar from "@/components/navbar";
 import Link from "next/link";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, Home } from "lucide-react";
 import { Property } from "@/lib/data";
 
 export default function SearchPage() {
@@ -99,7 +99,13 @@ function SearchContent() {
                             {filtered.map(property => (
                                 <Link href={`/properties/${property.id}`} key={property.id} className="group block relative aspect-[4/5] overflow-hidden rounded-2xl bg-zinc-900 border border-white/5">
                                     <div className="absolute inset-0">
-                                        <img src={property.thumbnailUrl} alt={property.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                        {property.thumbnailUrl ? (
+                                            <img src={property.thumbnailUrl} alt={property.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                        ) : (
+                                            <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
+                                                <Home className="text-gray-600" size={48} />
+                                            </div>
+                                        )}
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                                     </div>
 

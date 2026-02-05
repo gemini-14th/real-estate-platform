@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Navbar from "@/components/navbar";
-import { Plus, Edit2, Trash2, Loader2, RefreshCcw, LogOut } from "lucide-react";
-import AddListingModal from "@/components/add-listing-modal";
+import { Plus, Edit2, Trash2, Loader2, RefreshCcw, LogOut, LayoutDashboard, Home } from "lucide-react";
+import ListingModal from "@/components/add-listing-modal";
 import { Property } from "@/lib/data";
 
 export default function AdminPage() {
@@ -29,11 +29,8 @@ export default function AdminPage() {
 
     useEffect(() => {
         const secret = localStorage.getItem("admin_secret");
-        const cleanSecret = secret?.trim();
-        const envSecret = process.env.NEXT_PUBLIC_ADMIN_SECRET?.trim();
-
-        if (!cleanSecret || !envSecret || cleanSecret !== envSecret) {
-            window.location.href = "/";
+        if (!secret) {
+            window.location.href = "/auth-admin";
             return;
         }
         fetchProperties();
@@ -55,9 +52,8 @@ export default function AdminPage() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this listing? Created listings cannot be recovered.")) return;
+        if (!confirm("Are you sure you want to delete this listing?")) return;
 
-        // Optimistic UI update could go here, but for simplicity we wait
         try {
             const res = await fetch(`/api/properties/${id}`, { method: "DELETE" });
             if (res.ok) {
@@ -75,25 +71,22 @@ export default function AdminPage() {
     return (
         <div className="min-h-screen bg-black text-white">
             <Navbar />
-            <div className="max-w-6xl mx-auto px-6 py-24">
+            <div className="max-w-7xl mx-auto px-6 py-28 md:py-32">
 
-                <div className="flex justify-between items-center mb-12">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
                     <div>
-                        <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
-                        <p className="text-gray-400">Manage your real estate listings and content.</p>
+                        <div className="flex items-center gap-3 text-primary mb-2">
+                            <LayoutDashboard size={20} />
+                            <span className="text-xs font-bold uppercase tracking-widest">Control Center</span>
+                        </div>
+                        <h1 className="text-4xl font-black text-white">Dashboard</h1>
+                        <p className="text-gray-500 mt-2 font-medium">Manage your Kenyan real estate portfolio.</p>
                     </div>
 
-                    <div className="flex gap-4">
-                        <button
-                            onClick={handleLogout}
-                            className="flex items-center gap-2 px-6 py-3 bg-red-500/10 border border-red-500/20 text-red-500 font-bold rounded-xl hover:bg-red-500/20 transition-colors"
-                        >
-                            <LogOut size={20} />
-                            Logout
-                        </button>
+                    <div className="flex items-center gap-4 w-full md:w-auto">
                         <button
                             onClick={fetchProperties}
-                            className="p-3 bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-colors"
+                            className="p-4 bg-zinc-900 text-white rounded-2xl hover:bg-zinc-800 transition-colors border border-white/5 active:scale-95"
                         >
                             <RefreshCcw size={20} className={isLoading ? "animate-spin" : ""} />
                         </button>
@@ -102,76 +95,113 @@ export default function AdminPage() {
                                 setEditingProperty(null);
                                 setIsModalOpen(true);
                             }}
-                            className="flex items-center gap-2 px-6 py-3 bg-primary text-black font-bold rounded-xl hover:bg-primary/90 transition-colors"
+                            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-8 py-4 bg-primary text-black font-bold rounded-2xl hover:bg-primary/90 transition-all active:scale-95 shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]"
                         >
                             <Plus size={20} />
-                            Add New Listing
+                            New Listing
                         </button>
                     </div>
                 </div>
 
-                <div className="grid gap-6">
-                    <div className="p-6 bg-zinc-900 border border-white/5 rounded-2xl">
-                        <div className="grid grid-cols-12 gap-4 text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 px-4">
-                            <div className="col-span-12 md:col-span-5">Property</div>
-                            <div className="col-span-6 md:col-span-2 hidden md:block">Price</div>
-                            <div className="col-span-6 md:col-span-2 hidden md:block">Type</div>
-                            <div className="col-span-6 md:col-span-3 text-right">Actions</div>
+                <div className="grid grid-cols-1 gap-6">
+                    <div className="p-1 bg-zinc-900/50 border border-white/5 rounded-[2rem] overflow-hidden backdrop-blur-sm">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="text-xs font-bold text-gray-500 uppercase tracking-widest border-b border-white/5">
+                                        <th className="px-8 py-6">Property</th>
+                                        <th className="px-8 py-6 hidden md:table-cell">Price</th>
+                                        <th className="px-8 py-6 hidden md:table-cell">Details</th>
+                                        <th className="px-8 py-6 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-white/5">
+                                    {isLoading ? (
+                                        <tr>
+                                            <td colSpan={4} className="py-24 text-center">
+                                                <div className="flex flex-col items-center gap-4">
+                                                    <Loader2 className="animate-spin text-primary" size={40} />
+                                                    <p className="text-gray-500 font-medium">Loading listings...</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : properties.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={4} className="py-24 text-center">
+                                                <div className="flex flex-col items-center gap-4 text-gray-500">
+                                                    <Home size={40} className="opacity-20" />
+                                                    <p className="font-medium">No properties found. Start by creating one!</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        properties.map((property) => (
+                                            <tr key={property.id} className="group hover:bg-white/[0.02] transition-colors">
+                                                <td className="px-8 py-6">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-20 h-14 rounded-xl overflow-hidden bg-black relative shrink-0 border border-white/5">
+                                                            {property.thumbnailUrl ? (
+                                                                <img src={property.thumbnailUrl} className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" />
+                                                            ) : (
+                                                                <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
+                                                                    <Home className="text-gray-600" size={20} />
+                                                                </div>
+                                                            )}
+                                                            <div className="absolute top-1 right-1 bg-primary text-black text-[10px] font-black px-1.5 py-0.5 rounded-md uppercase">
+                                                                {property.type}
+                                                            </div>
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <h3 className="font-bold text-white truncate">{property.title}</h3>
+                                                            <p className="text-xs text-gray-500 truncate">{property.location}</p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-6 hidden md:table-cell font-mono text-primary font-bold">
+                                                    KSh {property.price.toLocaleString()}
+                                                </td>
+                                                <td className="px-8 py-6 hidden md:table-cell">
+                                                    <div className="flex gap-2">
+                                                        <span className="text-[10px] font-bold bg-white/5 text-gray-400 px-2 py-1 rounded-md">{property.beds} BEDS</span>
+                                                        <span className="text-[10px] font-bold bg-white/5 text-gray-400 px-2 py-1 rounded-md">{property.baths} BATHS</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-6">
+                                                    <div className="flex justify-end gap-3">
+                                                        <button
+                                                            onClick={() => handleEdit(property)}
+                                                            className="p-3 bg-zinc-800 text-gray-400 hover:text-white hover:bg-zinc-700 rounded-xl transition-all"
+                                                        >
+                                                            <Edit2 size={18} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(property.id!)}
+                                                            className="p-3 bg-red-500/10 text-red-500/60 hover:text-red-500 hover:bg-red-500/20 rounded-xl transition-all"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
-
-                        {isLoading ? (
-                            <div className="py-20 flex justify-center text-gray-500">
-                                <Loader2 size={32} className="animate-spin mb-2" />
-                            </div>
-                        ) : (
-                            <div className="space-y-2">
-                                {properties.map((property) => (
-                                    <div key={property.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-4 bg-black/40 rounded-xl hover:bg-black/60 transition-colors border border-transparent hover:border-white/5">
-                                        <div className="col-span-5 flex items-center gap-4">
-                                            <div className="w-16 h-10 rounded-lg overflow-hidden bg-gray-800 relative shrink-0">
-                                                <video src={property.videoUrl} className="w-full h-full object-cover" />
-                                            </div>
-                                            <div className="min-w-0">
-                                                <h3 className="font-bold truncate">{property.title}</h3>
-                                                <p className="text-sm text-gray-400 truncate">{property.location}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="col-span-2 font-medium hidden md:block text-sm">
-                                            KSh {property.price.toLocaleString()}
-                                        </div>
-
-                                        <div className="col-span-2 hidden md:block">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${property.type === 'Sale' || property.type === 'Buy'
-                                                ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
-                                                : 'bg-green-500/10 text-green-500 border border-green-500/20'
-                                                }`}>
-                                                For {property.type === 'Buy' ? 'Sale' : property.type}
-                                            </span>
-                                        </div>
-
-                                        <div className="col-span-12 md:col-span-3 flex justify-end gap-2 border-t md:border-t-0 border-white/5 pt-4 md:pt-0">
-                                            <button
-                                                onClick={() => handleEdit(property)}
-                                                className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                                            >
-                                                <Edit2 size={18} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(property.id)}
-                                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
                     </div>
                 </div>
 
-                <AddListingModal
+                <div className="flex justify-end mt-12">
+                    <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-2 px-6 py-3 text-gray-500 hover:text-red-500 transition-colors font-bold text-sm bg-white/5 rounded-xl border border-white/5"
+                    >
+                        <LogOut size={18} />
+                        Logout Section
+                    </button>
+                </div>
+
+                <ListingModal
                     isOpen={isModalOpen}
                     onClose={handleCloseModal}
                     onSuccess={fetchProperties}

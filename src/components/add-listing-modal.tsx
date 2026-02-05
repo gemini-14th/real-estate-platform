@@ -24,6 +24,8 @@ export default function ListingModal({ isOpen, onClose, onSuccess, initialData }
         description: "",
         videoUrl: "",
         thumbnailUrl: "",
+        images: [] as string[],
+        tags: [] as string[],
     });
 
     useEffect(() => {
@@ -39,27 +41,11 @@ export default function ListingModal({ isOpen, onClose, onSuccess, initialData }
                 description: initialData?.description || "",
                 videoUrl: initialData?.videoUrl || "",
                 thumbnailUrl: initialData?.thumbnailUrl || "",
+                images: initialData?.images || [],
+                tags: initialData?.tags || ["New Listing"],
             });
         }
     }, [isOpen, initialData]);
-
-    // Reset form when initialData changes or modal opens
-    // (In a real app, useEffect might be needed, but since we remount/control visibility, initial state might is tricky.
-    // However, since we are doing a simple modal, we can initialize state directly if the component is conditionally rendered or we can use useEffect)
-
-    // Better approach for modal reuse:
-    // When `initialData` changes (i.e. we click edit on a different item), we need to update state.
-    // However, hooks cannot be inside loops or conditionals.
-    // The simplest way without complex useEffects is to key the modal on the parent, 
-    // OR we just use a useEffect here to sync.
-
-    // Let's use a key in the parent to force remount, 
-    // OR just use useEffect here. useEffect is safer.
-
-    // Actually, I'll just stick to standard functional component patterns.
-    // Since I'm editing the file in place, let's add a useEffect to sync if isOpen changes or initialData changes.
-    // But wait, React state initialized in `useState` only runs once. 
-    // I will add a useEffect to reset the form data when `initialData` changes.
 
     const isEditing = !!initialData;
 
@@ -82,11 +68,8 @@ export default function ListingModal({ isOpen, onClose, onSuccess, initialData }
                     beds: Number(formData.beds),
                     baths: Number(formData.baths),
                     sqft: Number(formData.sqft),
-                    tags: initialData?.tags || ["New Listing"],
-                    agent: initialData?.agent || {
-                        name: "Admin User",
-                        avatar: "https://i.pravatar.cc/150?u=admin"
-                    }
+                    // If thumbnailUrl is empty but we have images, use the first one as thumbnail
+                    thumbnailUrl: formData.thumbnailUrl || formData.images[0] || "",
                 }),
             });
 
@@ -106,16 +89,16 @@ export default function ListingModal({ isOpen, onClose, onSuccess, initialData }
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div className="bg-zinc-900 border border-white/10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl p-6 relative">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+            <div className="bg-zinc-900 border border-white/10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl p-6 relative shadow-2xl">
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition-colors"
+                    className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400"
                 >
                     <X size={20} />
                 </button>
 
-                <h2 className="text-2xl font-bold mb-6">{isEditing ? "Edit Listing" : "Add New Listing"}</h2>
+                <h2 className="text-2xl font-bold mb-6 text-white">{isEditing ? "Edit Listing" : "Add New Listing"}</h2>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -123,7 +106,7 @@ export default function ListingModal({ isOpen, onClose, onSuccess, initialData }
                             <label className="text-sm font-medium text-gray-400">Title</label>
                             <input
                                 required
-                                className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-primary focus:outline-none"
+                                className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-primary focus:outline-none text-white"
                                 value={formData.title}
                                 onChange={e => setFormData({ ...formData, title: e.target.value })}
                                 placeholder="e.g. Modern Beach House"
@@ -134,7 +117,7 @@ export default function ListingModal({ isOpen, onClose, onSuccess, initialData }
                             <label className="text-sm font-medium text-gray-400">Location</label>
                             <input
                                 required
-                                className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-primary focus:outline-none"
+                                className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-primary focus:outline-none text-white"
                                 value={formData.location}
                                 onChange={e => setFormData({ ...formData, location: e.target.value })}
                                 placeholder="e.g. Westlands, Nairobi"
@@ -146,7 +129,7 @@ export default function ListingModal({ isOpen, onClose, onSuccess, initialData }
                             <input
                                 type="number"
                                 required
-                                className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-primary focus:outline-none"
+                                className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-primary focus:outline-none text-white"
                                 value={formData.price}
                                 onChange={e => setFormData({ ...formData, price: e.target.value })}
                                 placeholder="e.g. 15000000"
@@ -156,9 +139,9 @@ export default function ListingModal({ isOpen, onClose, onSuccess, initialData }
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-400">Type</label>
                             <select
-                                className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-primary focus:outline-none"
+                                className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-primary focus:outline-none text-white"
                                 value={formData.type}
-                                onChange={e => setFormData({ ...formData, type: e.target.value })}
+                                onChange={e => setFormData({ ...formData, type: e.target.value as any })}
                             >
                                 <option value="Buy">For Sale</option>
                                 <option value="Rent">For Rent</option>
@@ -171,7 +154,7 @@ export default function ListingModal({ isOpen, onClose, onSuccess, initialData }
                             <label className="text-sm font-medium text-gray-400">Beds</label>
                             <input
                                 type="number"
-                                className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-primary focus:outline-none"
+                                className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-primary focus:outline-none text-white"
                                 value={formData.beds}
                                 onChange={e => setFormData({ ...formData, beds: e.target.value })}
                             />
@@ -180,7 +163,7 @@ export default function ListingModal({ isOpen, onClose, onSuccess, initialData }
                             <label className="text-sm font-medium text-gray-400">Baths</label>
                             <input
                                 type="number"
-                                className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-primary focus:outline-none"
+                                className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-primary focus:outline-none text-white"
                                 value={formData.baths}
                                 onChange={e => setFormData({ ...formData, baths: e.target.value })}
                             />
@@ -189,7 +172,7 @@ export default function ListingModal({ isOpen, onClose, onSuccess, initialData }
                             <label className="text-sm font-medium text-gray-400">Sqft</label>
                             <input
                                 type="number"
-                                className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-primary focus:outline-none"
+                                className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-primary focus:outline-none text-white"
                                 value={formData.sqft}
                                 onChange={e => setFormData({ ...formData, sqft: e.target.value })}
                             />
@@ -199,36 +182,33 @@ export default function ListingModal({ isOpen, onClose, onSuccess, initialData }
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-400">Description</label>
                         <textarea
-                            className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-primary focus:outline-none h-24"
+                            className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-primary focus:outline-none h-24 text-white"
                             value={formData.description}
                             onChange={e => setFormData({ ...formData, description: e.target.value })}
                         />
                     </div>
 
-                    {/* Media Inputs (Cloudinary Uploads) */}
                     <div className="space-y-4 pt-4 border-t border-white/5">
-                        <h3 className="font-bold flex items-center gap-2">
-                            <Upload size={18} /> Media
+                        <h3 className="font-bold flex items-center gap-2 text-white text-sm">
+                            <Upload size={18} /> Media Uploads
                         </h3>
 
-                        <div className="grid grid-cols-1 gap-4">
+                        <div className="space-y-6">
                             <CloudinaryUpload
-                                label="Upload Property Video"
+                                label="Property Video (Max 1)"
                                 resourceType="video"
-                                onUpload={(url: string) => setFormData({ ...formData, videoUrl: url })}
+                                multiple={false}
+                                initialUrls={formData.videoUrl ? [formData.videoUrl] : []}
+                                onUpload={(urls: string[]) => setFormData({ ...formData, videoUrl: urls[0] || "" })}
                             />
-                            {formData.videoUrl && (
-                                <p className="text-xs text-gray-500 break-all">{formData.videoUrl}</p>
-                            )}
 
                             <CloudinaryUpload
-                                label="Upload Property Thumbnail"
+                                label="Property Photos (Handpicked for Gallery)"
                                 resourceType="image"
-                                onUpload={(url: string) => setFormData({ ...formData, thumbnailUrl: url })}
+                                multiple={true}
+                                initialUrls={formData.images}
+                                onUpload={(urls: string[]) => setFormData({ ...formData, images: urls })}
                             />
-                            {formData.thumbnailUrl && (
-                                <p className="text-xs text-gray-500 break-all">{formData.thumbnailUrl}</p>
-                            )}
                         </div>
                     </div>
 
@@ -236,7 +216,7 @@ export default function ListingModal({ isOpen, onClose, onSuccess, initialData }
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-4 bg-primary text-black font-bold rounded-xl hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                            className="w-full py-4 bg-primary text-black font-bold rounded-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                         >
                             {loading && <Loader2 className="animate-spin" size={20} />}
                             {loading ? (isEditing ? "Updating..." : "Creating...") : (isEditing ? "Update Listing" : "Create Listing")}

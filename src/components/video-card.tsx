@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState } from "react";
 import { Property } from "@/lib/data";
-import { Heart, MapPin, Share2, Volume2, VolumeX, Info, MessageSquare } from "lucide-react";
+import { MapPin, Share2, Volume2, VolumeX, Info, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -18,39 +18,7 @@ export default function VideoCard({ property, isActive }: VideoCardProps) {
     const [isMuted, setIsMuted] = useState(true);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-    const [isSaved, setIsSaved] = useState(false);
     const [hasError, setHasError] = useState(false);
-
-    useEffect(() => {
-        const checkSaved = async () => {
-            const savedUser = localStorage.getItem("user");
-            if (savedUser && isActive) {
-                const user = JSON.parse(savedUser);
-                const res = await fetch(`/api/saved?userId=${user.id}&propertyId=${property.id}`);
-                const data = await res.json();
-                setIsSaved(data.saved);
-            }
-        };
-        checkSaved();
-    }, [property.id, isActive]);
-
-    const toggleSave = async (e: React.MouseEvent) => {
-        e.stopPropagation();
-        const savedUser = localStorage.getItem("user");
-        if (!savedUser) {
-            window.location.href = "/auth";
-            return;
-        }
-
-        const user = JSON.parse(savedUser);
-        setIsSaved(!isSaved); // Optimistic update
-
-        await fetch("/api/saved", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: user.id, propertyId: property.id })
-        });
-    };
 
     const handleShare = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -69,8 +37,6 @@ export default function VideoCard({ property, isActive }: VideoCardProps) {
 
     useEffect(() => {
         if (isActive && videoRef.current && !hasError) {
-            // Reset error if switching active state
-
             const playPromise = videoRef.current.play();
             if (playPromise !== undefined) {
                 playPromise
@@ -78,12 +44,7 @@ export default function VideoCard({ property, isActive }: VideoCardProps) {
                         setIsPlaying(true);
                     })
                     .catch((error: any) => {
-                        // Suppress AbortError (common when scrolling fast)
                         if (error.name === 'AbortError') return;
-
-                        // Auto-play was prevented
-                        // This usually happens if the user hasn't interacted with the document yet
-                        // or if the video source is invalid.
                         console.warn("Autoplay prevented for video:", property.title, error);
                         setIsPlaying(false);
                     });
@@ -94,9 +55,7 @@ export default function VideoCard({ property, isActive }: VideoCardProps) {
         }
     }, [isActive, property.title, hasError]);
 
-    // Handle video error specifically
     const handleVideoError = (e: any) => {
-        // console.error("Video error for property:", property.title, e.currentTarget.error);
         setHasError(true);
     };
 
@@ -122,9 +81,11 @@ export default function VideoCard({ property, isActive }: VideoCardProps) {
     return (
         <div className="relative h-screen w-full snap-start overflow-hidden bg-black">
             {/* Media Player: Video or Fallback Image */}
-            {hasError || !property.videoUrl ? (
+            {hasError || !property.videoUrl || property.videoUrl === "" ? (
                 <img
-                    src={property.thumbnailUrl || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1080"}
+                    src={property.thumbnailUrl && property.thumbnailUrl !== ""
+                        ? property.thumbnailUrl
+                        : "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1080"}
                     alt={property.title}
                     className="h-full w-full object-cover"
                 />
@@ -137,7 +98,7 @@ export default function VideoCard({ property, isActive }: VideoCardProps) {
                     muted={isMuted}
                     playsInline
                     onClick={togglePlay}
-                    poster={property.thumbnailUrl}
+                    poster={property.thumbnailUrl !== "" ? property.thumbnailUrl : undefined}
                     onError={handleVideoError}
                 />
             )}
@@ -191,24 +152,8 @@ export default function VideoCard({ property, isActive }: VideoCardProps) {
                             </div>
                         </div>
 
-                        {/* Side Actions (Like, Share, Details) */}
+                        {/* Side Actions (Share, Details, Contact) */}
                         <div className="flex flex-col gap-4 pointer-events-auto ml-4">
-                            <button
-                                onClick={toggleSave}
-                                className={cn(
-                                    "flex flex-col items-center gap-1 transition-colors group",
-                                    isSaved ? "text-red-500" : "text-white hover:text-primary"
-                                )}
-                            >
-                                <div className={cn(
-                                    "p-3 backdrop-blur-md rounded-full border transition-transform group-hover:scale-110",
-                                    isSaved ? "bg-red-500/20 border-red-500/50" : "bg-black/40 border-white/10"
-                                )}>
-                                    <Heart size={24} fill={isSaved ? "currentColor" : "none"} />
-                                </div>
-                                <span className="text-xs font-medium">{isSaved ? "Saved" : "Save"}</span>
-                            </button>
-
                             <button
                                 onClick={handleShare}
                                 className="flex flex-col items-center gap-1 text-white hover:text-primary transition-colors group"

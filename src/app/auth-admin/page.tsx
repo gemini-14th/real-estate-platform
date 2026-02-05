@@ -1,102 +1,86 @@
 "use client";
 
 import { useState } from "react";
-import Navbar from "@/components/navbar";
-import { Lock, ShieldCheck, AlertCircle, ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { Shield, Loader2, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
-export default function AdminAuthPage() {
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState(false);
-    const [success, setSuccess] = useState(false);
+export default function AuthAdminPage() {
+    const [secret, setSecret] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        setLoading(true);
+        setError("");
 
-        // Robust comparison with trimming
-        const cleanPassword = password?.trim();
-        const cleanSecret = process.env.NEXT_PUBLIC_ADMIN_SECRET?.trim();
+        try {
+            const res = await fetch("/api/admin/auth", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ secret: secret.trim() }),
+            });
 
-        console.log("Input length:", cleanPassword?.length);
-        console.log("Secret loaded:", !!cleanSecret);
-
-        if (cleanPassword && cleanSecret && cleanPassword === cleanSecret) {
-            localStorage.setItem("admin_secret", cleanPassword);
-            setSuccess(true);
-            setError(false);
-            // Reload to update navbar
-            setTimeout(() => {
+            if (res.ok) {
+                localStorage.setItem("admin_secret", secret.trim());
                 window.location.href = "/admin";
-            }, 1000);
-        } else {
-            console.log("Login failed");
-            setError(true);
-            setSuccess(false);
+            } else {
+                const data = await res.json();
+                setError(data.error || "Invalid secret key. Access denied.");
+            }
+        } catch (err) {
+            console.error(err);
+            setError("Failed to verify secret key. Check your connection.");
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-black text-white flex flex-col">
-            <Navbar />
+        <div className="min-h-screen bg-black flex items-center justify-center p-6">
+            <div className="w-full max-w-sm">
+                <div className="text-center mb-10">
+                    <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/10 rounded-3xl mb-6">
+                        <Shield size={40} className="text-primary" />
+                    </div>
+                    <h1 className="text-3xl font-bold text-white mb-2">Admin Portal</h1>
+                    <p className="text-gray-500">Enter your secret key to continue</p>
+                </div>
 
-            <div className="flex-1 flex items-center justify-center p-6">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="w-full max-w-md p-8 bg-zinc-900 border border-white/10 rounded-3xl"
-                >
-                    <div className="flex justify-center mb-8">
-                        <div className="p-4 bg-primary/20 rounded-2xl">
-                            <Lock className="text-primary" size={32} />
-                        </div>
+                <form onSubmit={handleLogin} className="space-y-6">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-400">Secret Access Key</label>
+                        <input
+                            type="password"
+                            required
+                            className="w-full bg-zinc-900 border border-white/10 rounded-2xl p-4 focus:border-primary focus:outline-none text-white text-center tracking-[0.5em] text-xl"
+                            value={secret}
+                            onChange={(e) => setSecret(e.target.value)}
+                            placeholder="••••••••"
+                        />
                     </div>
 
-                    <h1 className="text-3xl font-bold text-center mb-2">Admin Portal</h1>
-                    <p className="text-gray-400 text-center mb-8">Enter the secret key to unlock admin privileges.</p>
+                    {error && (
+                        <p className="text-red-500 text-sm text-center font-medium bg-red-500/10 py-3 rounded-xl border border-red-500/20">
+                            {error}
+                        </p>
+                    )}
 
-                    <form onSubmit={handleLogin} className="space-y-6">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-500 uppercase tracking-wider px-1">Secret Key</label>
-                            <input
-                                type="password"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className={`w-full bg-black/40 border ${error ? 'border-red-500/50' : 'border-white/10'} rounded-2xl p-4 focus:border-primary focus:outline-none transition-all`}
-                                placeholder="••••••••"
-                            />
-                        </div>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-4 bg-primary text-black font-bold rounded-2xl hover:bg-primary/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 group"
+                    >
+                        {loading ? <Loader2 className="animate-spin" size={20} /> : "Authenticate"}
+                        {!loading && <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />}
+                    </button>
 
-                        {error && (
-                            <motion.div
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="flex items-center gap-2 text-red-500 text-sm bg-red-500/10 p-3 rounded-xl border border-red-500/20"
-                            >
-                                <AlertCircle size={16} />
-                                <span>Incorrect secret key. Access denied.</span>
-                            </motion.div>
-                        )}
-
-                        {success && (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="flex items-center gap-2 text-green-500 text-sm bg-green-500/10 p-3 rounded-xl border border-green-500/20"
-                            >
-                                <ShieldCheck size={16} />
-                                <span>Success! Redirecting to dashboard...</span>
-                            </motion.div>
-                        )}
-
-                        <button
-                            type="submit"
-                            className="w-full py-4 bg-primary text-black font-bold rounded-2xl hover:bg-primary/90 transition-all flex items-center justify-center gap-2 group"
-                        >
-                            Unlock Dashboard <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                        </button>
-                    </form>
-                </motion.div>
+                    <div className="flex flex-col gap-4">
+                        <Link href="/" className="text-center text-sm text-gray-500 hover:text-white transition-colors">
+                            Return to site
+                        </Link>
+                    </div>
+                </form>
             </div>
         </div>
     );

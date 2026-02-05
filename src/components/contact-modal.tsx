@@ -72,7 +72,13 @@ export default function ContactModal({ isOpen, onClose, agent, propertyTitle }: 
                     ) : (
                         <div className="p-8">
                             <div className="flex items-center gap-4 mb-8">
-                                <img src={agent.avatar} alt={agent.name} className="w-16 h-16 rounded-full object-cover border-2 border-primary" />
+                                {agent.avatar ? (
+                                    <img src={agent.avatar} alt={agent.name} className="w-16 h-16 rounded-full object-cover border-2 border-primary" />
+                                ) : (
+                                    <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center border-2 border-primary">
+                                        <span className="text-xl font-bold font-mono">{agent.name.charAt(0)}</span>
+                                    </div>
+                                )}
                                 <div>
                                     <p className="text-sm text-gray-400">Contact Agent for</p>
                                     <h3 className="text-xl font-bold">{agent.name}</h3>

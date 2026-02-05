@@ -4,15 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "postinstall": "prisma generate"
+    "lint": "next lint"
   },
   "dependencies": {
-    "@prisma/client": "^6.2.1",
-    "@types/bcryptjs": "^2.4.6",
-    "bcryptjs": "^3.0.3",
+    "@neondatabase/serverless": "^1.0.2",
     "cloudinary": "^2.9.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.28.1",
@@ -29,10 +26,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
-    "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.1.4",
-    "prisma": "^6.2.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
