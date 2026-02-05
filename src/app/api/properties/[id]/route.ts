@@ -24,6 +24,7 @@ export async function GET(
 
         return NextResponse.json(parsedProperty);
     } catch (error) {
+        console.error("GET property error:", error);
         return NextResponse.json({ error: 'Failed to fetch property' }, { status: 500 });
     }
 }
@@ -39,6 +40,7 @@ export async function DELETE(
         });
         return NextResponse.json({ success: true });
     } catch (error) {
+        console.error("DELETE property error:", error);
         return NextResponse.json({ error: 'Property not found or delete failed' }, { status: 404 });
     }
 }
