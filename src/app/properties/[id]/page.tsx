@@ -5,16 +5,40 @@ import { notFound } from "next/navigation";
 import { Property } from "@/lib/data";
 import PropertyActions from "@/components/property-actions";
 
+import { sql } from "@/lib/neon";
+
 async function getProperty(id: string): Promise<Property | null> {
     try {
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-        const res = await fetch(`${baseUrl}/api/properties/${id}`, {
-            cache: 'no-store'
-        });
-        if (!res.ok) return null;
-        return res.json();
+        const results = await sql`
+            SELECT * FROM units WHERE id = ${id}
+        `;
+
+        if (results.length === 0) return null;
+
+        const unit = results[0];
+        return {
+            id: unit.id,
+            title: unit.title,
+            price: Number(unit.price),
+            location: unit.location,
+            type: unit.type === 'Sale' ? 'Buy' : unit.type,
+            beds: unit.beds,
+            baths: unit.baths,
+            sqft: unit.sqft,
+            description: unit.description,
+            videoUrl: unit.video_url,
+            thumbnailUrl: unit.thumbnail_url,
+            images: unit.images ? unit.images.split(',') : (unit.thumbnail_url ? [unit.thumbnail_url] : []),
+            tags: unit.tags ? unit.tags.split(',') : [],
+            createdAt: unit.created_at,
+            updatedAt: unit.updated_at,
+            agent: {
+                name: "Alain Christian",
+                avatar: "https://i.pravatar.cc/150?u=alain"
+            }
+        };
     } catch (error) {
-        console.error("Error fetching property:", error);
+        console.error("Error fetching property directly from Neon:", error);
         return null;
     }
 }

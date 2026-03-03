@@ -131,11 +131,11 @@ export default function VideoCard({ property, isActive }: VideoCardProps) {
                 {/* Bottom Info */}
                 <div className="flex flex-col gap-4 pb-20 md:pb-8">
                     <div className="flex items-end justify-between">
-                        <div className="flex-1 space-y-2 pointer-events-auto">
+                        <Link href={`/properties/${property.id}`} className="flex-1 space-y-2 pointer-events-auto group">
                             <motion.h2
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                className="text-3xl font-bold text-white leading-tight"
+                                className="text-3xl font-bold text-white leading-tight group-hover:text-primary transition-colors"
                             >
                                 {property.title}
                             </motion.h2>
@@ -150,7 +150,7 @@ export default function VideoCard({ property, isActive }: VideoCardProps) {
                                 <span className="bg-white/10 px-2 py-1 rounded backdrop-blur-sm">{property.baths} Baths</span>
                                 <span className="bg-white/10 px-2 py-1 rounded backdrop-blur-sm">{property.sqft} sqft</span>
                             </div>
-                        </div>
+                        </Link>
 
                         {/* Side Actions (Share, Details, Contact) */}
                         <div className="flex flex-col gap-4 pointer-events-auto ml-4">

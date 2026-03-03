@@ -188,6 +188,54 @@ export default function ListingModal({ isOpen, onClose, onSuccess, initialData }
                         />
                     </div>
 
+                    <div className="space-y-4">
+                        <label className="text-sm font-medium text-gray-400">Amenities</label>
+                        <div className="flex flex-wrap gap-2 mb-2">
+                            {formData.tags.map((tag, index) => (
+                                <span key={index} className="px-3 py-1 bg-primary/10 text-primary border border-primary/20 rounded-lg text-xs font-bold flex items-center gap-2">
+                                    {tag}
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, tags: formData.tags.filter((_, i) => i !== index) })}
+                                        className="hover:text-white transition-colors"
+                                    >
+                                        <X size={12} />
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                        <div className="flex gap-2">
+                            <input
+                                className="flex-1 bg-black/40 border border-white/10 rounded-xl p-3 focus:border-primary focus:outline-none text-white text-sm"
+                                placeholder="e.g. Swimming Pool, Fiber Internet..."
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        const value = e.currentTarget.value.trim();
+                                        if (value && !formData.tags.includes(value)) {
+                                            setFormData({ ...formData, tags: [...formData.tags, value] });
+                                            e.currentTarget.value = '';
+                                        }
+                                    }
+                                }}
+                            />
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                                    const value = input.value.trim();
+                                    if (value && !formData.tags.includes(value)) {
+                                        setFormData({ ...formData, tags: [...formData.tags, value] });
+                                        input.value = '';
+                                    }
+                                }}
+                                className="px-4 bg-zinc-800 text-white rounded-xl hover:bg-zinc-700 transition-colors text-sm font-bold"
+                            >
+                                Add
+                            </button>
+                        </div>
+                    </div>
+
                     <div className="space-y-4 pt-4 border-t border-white/5">
                         <h3 className="font-bold flex items-center gap-2 text-white text-sm">
                             <Upload size={18} /> Media Uploads

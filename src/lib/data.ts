@@ -16,6 +16,8 @@ export interface Property {
         name: string;
         avatar: string;
     };
+    createdAt?: string | Date;
+    updatedAt?: string | Date;
 }
 
 export const PROPERTIES: Property[] = [
